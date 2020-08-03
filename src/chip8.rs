@@ -62,11 +62,11 @@ impl Chip8 {
         Self::load_font_set(&mut memory, &font_set);
 
         // instructions tables
-        let mut table: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 16);
+        let mut table: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 32);
         let mut table0: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 16);
         let mut table8: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 16);
         let mut tableE: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 16);
-        let mut tableF: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 16);
+        let mut tableF: Vec<for<'r> fn(&'r mut Chip8) > = vec!(Self::OP_NULL; 128);
 
         table[0x0] = Chip8::table0;
 		table[0x1] = Chip8::OP_1nnn;
@@ -599,7 +599,6 @@ impl Chip8 {
         }
     }
 }
-
 
 
 // Tests
