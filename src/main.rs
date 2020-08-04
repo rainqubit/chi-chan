@@ -1,22 +1,24 @@
 use minifb::{Key, KeyRepeat, Window, WindowOptions, Scale, ScaleMode};
 mod chip8;
 
+mod test_chip8;
+
 type Chip8 = chip8::Chip8;
 
 //Graphic setup
-const PIXEL_SIZE: usize = 8;
+// const PIXEL_SIZE: usize = 8;
 const WIN_WIDTH: usize = 64;
-const WIN_HEIGHT: usize = 64;
+const WIN_HEIGHT: usize = 32;
 
 fn main() {
     let mut chip: Chip8 = Chip8::new();
 
     // load rom
-    let rom_path = String::from("/home/riyan/code/chichan/src/test_opcode.ch8");
+    let bc_test = String::from("/home/riyan/code/chichan/src/BC_test.ch8");
+    let op_test = String::from("/home/riyan/code/chichan/src/test_opcode.ch8");
+    let tetris = String::from("/home/riyan/code/chichan/src/tetris.ch8");
+    let rom_path = op_test;
     chip.load_rom(&rom_path);
-    for x in 0x200..chip.memory.len(){
-        print!("|{:X?}|", chip.memory[x as usize]);
-    }
 
     let mut buffer: Vec<u32> = vec![0; WIN_WIDTH * WIN_HEIGHT];
 
@@ -30,8 +32,8 @@ fn main() {
         });
 
     // Limit to max ~60 fps update rate
-    window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
-    //window.limit_update_rate(Some(std::time::Duration::from_micros(600000)));
+    // window.limit_update_rate(Some(std::time::Duration::from_micros(16600)));
+    window.limit_update_rate(Some(std::time::Duration::from_micros(4687)));
 
     // main loop
     while window.is_open() && !window.is_key_down(Key::Escape){

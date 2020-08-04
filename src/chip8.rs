@@ -4,8 +4,8 @@ use std::fs;
 const MEM_SIZE: usize = 4096;
 const START_ADDRESS: usize = 0x200;
 const FONT_SET_START_ADDRESS: usize = 0x50;
-const VIDEO_WIDTH: usize = 64;
-const VIDEO_HEIGHT: usize = 32;
+const VIDEO_WIDTH: usize = 32;
+const VIDEO_HEIGHT: usize = 64;
 const VIDEO_SIZE: usize = VIDEO_WIDTH * VIDEO_HEIGHT;
 
 type Memory = [u8; MEM_SIZE];
@@ -162,18 +162,18 @@ impl Chip8 {
 
     pub fn cycle(self: &mut Self) {
         //debug
-        print!("stack : ");
-        for x in self.stack.iter(){
-            print!("{:X?}|" , x);
-        }
+        // print!("stack : ");
+        // for x in self.stack.iter(){
+        //     print!("{:X?}|" , x);
+        // }
 
-        println!("PC : {:X?}", self.pc);
-        println!("I : {:X?}", self.index);
+        // println!("PC : {:X?}", self.pc);
+        // println!("I : {:X?}", self.index);
 
         // fetch
         let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8) | (self.memory[self.pc as usize + 1]) as u16;
         self.opcode = opcode;
-        println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
+        // println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
         // increment pc before execute
         self.pc += 2;
 
@@ -314,7 +314,8 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
 
-        self.registers[vx as usize] = vy;
+        let val = self.registers[vy as usize];
+        self.registers[vx as usize] = val;
     }
 
     /// OR Vx, Vy,
@@ -323,7 +324,7 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
 
-        self.registers[vx as usize] |= vy;
+        self.registers[vx as usize] |= self.registers[vy as usize];
     }
 
     /// AND Vx, Vy,
@@ -332,7 +333,7 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
 
-        self.registers[vx as usize] &= vy;
+        self.registers[vx as usize] &= self.registers[vy as usize];
     }
 
     /// XOR Vx, Vy,
@@ -341,7 +342,7 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let vy: u8 = ((self.opcode & 0x00F0) >> 4) as u8;
 
-        self.registers[vx as usize] ^= vy;
+        self.registers[vx as usize] ^= self.registers[vy as usize];
     }
 
     /// ADD Vx, Vy, set Vf = Carry,
@@ -599,8 +600,8 @@ impl Chip8 {
     pub fn OP_Fx55(self: &mut Self) {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
 
-        for i in 0..vx {
-            self.memory[(self.index + i as u16) as usize] = self.registers[i as usize];
+        for i in 0..vx + 1 {
+            self.memory[(self.index + (i as u16)) as usize] = self.registers[i as usize];
         }
     }
 
@@ -609,38 +610,8 @@ impl Chip8 {
     pub fn OP_Fx65(self: &mut Self){
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
 
-        for x in 0..vx{
+        for x in 0..vx + 1{
             self.registers[x as usize] = self.memory[(self.index + x as u16) as usize];
         }
-    }
-}
-
-
-// Tests
-#[cfg(test)]
-#[allow(non_snake_case)]
-mod tests {
-    use super::*;
-    #[test]
-    fn test_OP_00E0() {
-        let mut chip = Chip8::new();
-        Chip8::OP_00E0(&mut chip);
-        let empty_video = [0 as u32; VIDEO_SIZE];
-
-        let mut equal = true;
-
-        for x in 0..chip.video.len() {
-            if chip.video[x as usize] != empty_video[x as usize] {
-                equal = false;
-                break;
-            }
-        }
-
-        assert!(equal);
-    }
-
-    #[test]
-    fn test_OP_00EE() {
-        unimplemented!();
     }
 }
