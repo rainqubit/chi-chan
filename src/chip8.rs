@@ -15,16 +15,16 @@ type Video = [u32; VIDEO_SIZE];
 #[allow(non_snake_case)]
 pub struct Chip8 {
     pub memory: Memory,
-    registers: [u8; 16],
-    index: u16,
-    pc: u16,
-    stack: [u16; 16],
-    sp: u8,
-    delay_timer: u8,
-    sound_timer: u8,
-    keypad: [u8; 16],
+    pub registers: [u8; 16],
+    pub index: u16,
+    pub pc: u16,
+    pub stack: [u16; 16],
+    pub sp: u8,
+    pub delay_timer: u8,
+    pub sound_timer: u8,
+    pub keypad: [u8; 16],
     pub video: Video,
-    opcode: u16,
+    pub opcode: u16,
     table: Vec<for<'r> fn(&'r mut Chip8)>,
     table0: Vec<for<'r> fn(&'r mut Chip8)>,
     table8: Vec<for<'r> fn(&'r mut Chip8)>,
@@ -161,9 +161,19 @@ impl Chip8 {
     }
 
     pub fn cycle(self: &mut Self) {
-        // fetch
-        let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8)| (self.memory[self.pc as usize + 1]) as u16;
+        //debug
+        print!("stack : ");
+        for x in self.stack.iter(){
+            print!("{:X?}|" , x);
+        }
 
+        println!("PC : {:X?}", self.pc);
+        println!("I : {:X?}", self.index);
+
+        // fetch
+        let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8) | (self.memory[self.pc as usize + 1]) as u16;
+        self.opcode = opcode;
+        println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
         // increment pc before execute
         self.pc += 2;
 
@@ -233,7 +243,7 @@ impl Chip8 {
     /// JMP addr,
     /// Jump to nnn, no stacking
     pub fn OP_1nnn(self: &mut Self) {
-        let address: u16 = self.opcode & 0xFFF as u16;
+        let address: u16 = self.opcode & 0x0FFF;
         self.pc = address;
     }
 
@@ -459,7 +469,7 @@ impl Chip8 {
         self.registers[0xF] = 0;
 
         for row in 0..height {
-            let spriteByte: u8 = self.registers[(self.index + row as u16) as usize];
+            let spriteByte: u8 = self.memory[(self.index + row as u16) as usize];
 
             for col in 0..8 {
                 let spritePixel: u8 = spriteByte & (0x80 >> col);
@@ -475,6 +485,11 @@ impl Chip8 {
                 }
             }
         }
+
+        // println!("Video : ");
+        // for x in self.video.iter(){
+        //     print!("{:X?}|", x);
+        // }
     }
 
     /// SKP Vx
