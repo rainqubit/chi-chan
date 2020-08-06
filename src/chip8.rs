@@ -173,7 +173,9 @@ impl Chip8 {
         // fetch
         let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8) | (self.memory[self.pc as usize + 1]) as u16;
         self.opcode = opcode;
-        // println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
+
+        println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
+
         // increment pc before execute
         self.pc += 2;
 
@@ -196,6 +198,18 @@ impl Chip8 {
         for x in 0..font_set.len() {
             memory[FONT_SET_START_ADDRESS + (x as usize)] = font_set[x]
         }
+    }
+
+    pub fn video_to_2d(&mut self) -> Vec<Vec<u32>> {
+        let mut result = vec![vec![0; VIDEO_HEIGHT]; VIDEO_WIDTH];
+
+        for y in 0..VIDEO_HEIGHT{
+            for x in 0..VIDEO_WIDTH {
+                result[x][y] = self.video[(y * VIDEO_WIDTH) + x];
+            }
+        }
+
+        result
     }
 
     // instructions tables
@@ -305,7 +319,15 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let byte: u8 = (self.opcode & 0x00FF) as u8;
 
-        self.registers[vx as usize] += byte;
+        println!("7xkk opcode = {:X} vx: {} | byte: {}",self.opcode, self.registers[vx as usize], byte);
+
+        //overflow handle??
+        if byte >= 0xFF{
+            self.registers[vx as usize] = 0xFF;
+        } else {
+            self.registers[vx as usize] += byte;
+        }
+        
     }
 
     /// LD Vx, Vy,

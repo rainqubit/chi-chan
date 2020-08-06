@@ -13,6 +13,20 @@ mod test_chip8 {
     const VIDEO_SIZE: usize = VIDEO_WIDTH * VIDEO_HEIGHT;
      
     #[test]
+    fn test_video_to_2d() {
+        // init
+        let mut chip = Chip8::new();
+        chip.video[0] = 0xFFFFFF;
+        chip.video[32] = 0xFFFFFF;
+
+        let video2d = chip.video_to_2d();
+
+        //test
+        assert_eq!(video2d[0][0], 0xFFFFFF);
+        assert_eq!(video2d[0][1], 0xFFFFFF);
+    }
+
+    #[test]
     fn test_OP_00E0() {
         let mut chip = Chip8::new();
         Chip8::OP_00E0(&mut chip);
