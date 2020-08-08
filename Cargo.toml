@@ -8,4 +8,7 @@ edition = "2018"
 
 [dependencies]
 rand="0.7.3"
-minifb = "0.17.0"
+coffee = { version = "0.4", features = ["opengl"] }
+
+[profile.dev]
+opt-level = 2
