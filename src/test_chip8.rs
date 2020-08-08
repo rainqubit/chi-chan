@@ -8,8 +8,8 @@ mod test_chip8 {
     const MEM_SIZE: usize = 4096;
     const START_ADDRESS: usize = 0x200;
     const FONT_SET_START_ADDRESS: usize = 0x50;
-    const VIDEO_WIDTH: usize = 32;
-    const VIDEO_HEIGHT: usize = 64;
+    const VIDEO_WIDTH: usize = 64;
+    const VIDEO_HEIGHT: usize = 32;
     const VIDEO_SIZE: usize = VIDEO_WIDTH * VIDEO_HEIGHT;
      
     #[test]

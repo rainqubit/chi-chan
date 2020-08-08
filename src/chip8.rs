@@ -4,9 +4,9 @@ use std::fs;
 const MEM_SIZE: usize = 4096;
 const START_ADDRESS: usize = 0x200;
 const FONT_SET_START_ADDRESS: usize = 0x50;
-const VIDEO_WIDTH: usize = 32;
-const VIDEO_HEIGHT: usize = 64;
-const VIDEO_SIZE: usize = VIDEO_WIDTH * VIDEO_HEIGHT;
+const VIDEO_WIDTH: usize = 64;
+const VIDEO_HEIGHT: usize = 32;
+const VIDEO_SIZE: usize = VIDEO_WIDTH * VIDEO_HEIGHT * 2;
 
 type Memory = [u8; MEM_SIZE];
 type Video = [u32; VIDEO_SIZE];
@@ -129,7 +129,7 @@ impl Chip8 {
             delay_timer: 0,
             sound_timer: 0,
             keypad: [0; 16],
-            video: [0; 64 * 32],
+            video: [0; VIDEO_SIZE],
             opcode: 0,
             table: table,
             table0: table0,
@@ -174,7 +174,7 @@ impl Chip8 {
         let opcode: u16 = ((self.memory[self.pc as usize] as u16) << 8) | (self.memory[self.pc as usize + 1]) as u16;
         self.opcode = opcode;
 
-        println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
+        // println!("executing {:X?} | table {:X?}", opcode, (opcode & 0xF000) >> 12);
 
         // increment pc before execute
         self.pc += 2;
@@ -319,14 +319,16 @@ impl Chip8 {
         let vx: u8 = ((self.opcode & 0x0F00) >> 8) as u8;
         let byte: u8 = (self.opcode & 0x00FF) as u8;
 
-        println!("7xkk opcode = {:X} vx: {} | byte: {}",self.opcode, self.registers[vx as usize], byte);
+        // println!("7xkk opcode = {:X} vx: {} | byte: {}",self.opcode, self.registers[vx as usize], byte);
 
         //overflow handle??
-        if byte >= 0xFF{
-            self.registers[vx as usize] = 0xFF;
-        } else {
-            self.registers[vx as usize] += byte;
-        }
+        // if byte >= 0xFF{
+        //     self.registers[vx as usize] = 0xFF;
+        // } else {
+        //     self.registers[vx as usize] += byte;
+        // }
+
+        self.registers[vx as usize] += byte;
         
     }
 
@@ -496,8 +498,9 @@ impl Chip8 {
 
             for col in 0..8 {
                 let spritePixel: u8 = spriteByte & (0x80 >> col);
+                let screen_index = ((yPos + row) as usize) * VIDEO_WIDTH + ((xPos + col) as usize);
                 let screenPixel: &mut u32 = &mut self.video
-                    [((yPos + row) as usize) * VIDEO_WIDTH + ((xPos + col) as usize)];
+                    [screen_index - 1];
 
                 if spritePixel > 0 {
                     if *screenPixel == 0xFFFFFFFF {
